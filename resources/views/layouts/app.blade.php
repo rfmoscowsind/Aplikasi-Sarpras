@@ -19,6 +19,8 @@
                 <div class="sep">Sarpras Pusat</div>
                 <a href="{{ route('incoming.index') }}">Barang Masuk</a>
                 <a href="{{ route('distributions.index') }}">Distribusi</a>
+                <a href="{{ route('stock-movements.index') }}">Stock Ledger</a>
+                <a href="{{ route('audit.index') }}">Audit Log</a>
             @endif
             @if(auth()->user()->isSystemAdmin())
                 <div class="sep">Administrasi</div>
@@ -41,6 +43,8 @@
             @if(auth()->user()->isSarpras())
                 <a href="{{ route('incoming.index') }}">Barang Masuk</a>
                 <a href="{{ route('distributions.index') }}">Distribusi</a>
+                <a href="{{ route('stock-movements.index') }}">Ledger</a>
+                <a href="{{ route('audit.index') }}">Audit</a>
             @endif
         </div>
         <header class="topbar">

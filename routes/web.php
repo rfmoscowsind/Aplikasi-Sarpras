@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AuditLogController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BorrowingController;
 use App\Http\Controllers\DashboardController;
@@ -7,6 +8,7 @@ use App\Http\Controllers\DistributionController;
 use App\Http\Controllers\IncomingGoodsController;
 use App\Http\Controllers\PublicBorrowController;
 use App\Http\Controllers\ReturnRequestController;
+use App\Http\Controllers\StockMovementController;
 use App\Http\Controllers\UnitController;
 use App\Http\Controllers\UnitInventoryController;
 use App\Http\Controllers\UserController;
@@ -57,6 +59,9 @@ Route::middleware('auth')->group(function () {
         Route::post('/distributions/{distribution}/signed-document', [DistributionController::class, 'uploadSigned'])->name('distributions.signed.upload');
         Route::post('/distributions/{distribution}/complete', [DistributionController::class, 'complete'])->name('distributions.complete');
         Route::get('/distributions/{distribution}/signed-document', [DistributionController::class, 'signedDocument'])->name('distributions.signed.download');
+
+        Route::get('/stock-ledger', [StockMovementController::class, 'index'])->name('stock-movements.index');
+        Route::get('/audit-logs', [AuditLogController::class, 'index'])->name('audit.index');
     });
 
     Route::middleware('role:admin')->group(function () {

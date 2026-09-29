@@ -15,4 +15,9 @@ class AuditLog extends Model
             'after' => 'array',
         ];
     }
+
+    public function actor()
+    {
+        return $this->belongsTo(User::class, 'actor_id');
+    }
 }
