@@ -35,6 +35,11 @@ class UserController extends Controller
         return back()->with('success', 'Akun berhasil dibuat.');
     }
 
+    public function edit(User $user)
+    {
+        return view('users.edit', compact('user'));
+    }
+
     public function update(Request $request, User $user)
     {
         $data = $request->validate([
@@ -47,6 +52,12 @@ class UserController extends Controller
 
         if (empty($data['password'])) {
             unset($data['password']);
+        }
+
+        if ($user->is($request->user()) && !$request->boolean('is_active')) {
+            return back()
+                ->withErrors(['is_active' => 'Akun yang sedang digunakan tidak boleh menonaktifkan dirinya sendiri.'])
+                ->withInput();
         }
 
         $data['is_active'] = $request->boolean('is_active');

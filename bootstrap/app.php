@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\EnsureActiveUser;
 use App\Http\Middleware\EnsureSystemRole;
 use App\Http\Middleware\NoIndexPublicForm;
 use Illuminate\Foundation\Application;
@@ -17,6 +18,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->throttleWithRedis();
 
         $middleware->alias([
+            'active' => EnsureActiveUser::class,
             'role' => EnsureSystemRole::class,
             'noindex' => NoIndexPublicForm::class,
         ]);

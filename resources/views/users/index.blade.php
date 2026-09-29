@@ -6,7 +6,7 @@
         <div class="panel-head"><h2>Daftar Akun</h2></div>
         <div class="table-wrap">
             <table class="table">
-                <thead><tr><th>Nama</th><th>Email</th><th>Role</th><th>Unit</th><th>Status</th></tr></thead>
+                <thead><tr><th>Nama</th><th>Email</th><th>Role</th><th>Unit</th><th>Status</th><th></th></tr></thead>
                 <tbody>
                 @foreach($users as $user)
                     <tr>
@@ -15,6 +15,7 @@
                         <td><span class="badge">{{ strtoupper($user->system_role) }}</span></td>
                         <td>{{ $user->unitMemberships->pluck('unit.name')->filter()->join(', ') ?: '-' }}</td>
                         <td>{{ $user->is_active ? 'Aktif' : 'Nonaktif' }}</td>
+                        <td><a class="btn sm outline" href="{{ route('users.edit', $user) }}">Edit</a></td>
                     </tr>
                 @endforeach
                 </tbody>
