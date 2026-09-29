@@ -1,0 +1,19 @@
+[Unit]
+Description=Aplikasi Sarpras Laravel Queue Worker
+After=network.target redis-server.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=www-data
+Group=www-data
+WorkingDirectory=/var/www/sarpras
+ExecStart=/usr/bin/php artisan queue:work --sleep=1 --tries=3 --timeout=120 --max-time=3600
+ExecReload=/bin/kill -USR2 $MAINPID
+Restart=always
+RestartSec=5
+KillSignal=SIGTERM
+TimeoutStopSec=360
+
+[Install]
+WantedBy=multi-user.target
