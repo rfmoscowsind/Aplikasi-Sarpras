@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Item;
 use App\Models\Unit;
+use App\Models\UnitStock;
 use App\Services\ExistingInventoryService;
 use App\Services\UnitAccessService;
 use Illuminate\Http\Request;
@@ -29,6 +30,19 @@ class UnitInventoryController extends Controller
         $catalog = Item::query()->orderBy('name')->limit(200)->get(['id', 'name', 'specification']);
 
         return view('inventory.index', compact('unit', 'stocks', 'catalog'));
+    }
+
+    public function photo(Request $request, Unit $unit, UnitStock $stock)
+    {
+        abort_unless($stock->unit_id === $unit->id, 404);
+        abort_unless($this->access->canView($request->user(), $unit), 403);
+        abort_unless($stock->photo_object_key, 404);
+
+        return Storage::response(
+            $stock->photo_object_key,
+            basename($stock->photo_object_key),
+            ['Cache-Control' => 'private, no-store, max-age=0'],
+        );
     }
 
     public function storeExisting(Request $request, Unit $unit)

@@ -33,6 +33,7 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/units/{unit}/inventory', [UnitInventoryController::class, 'index'])->name('inventory.index');
     Route::post('/units/{unit}/inventory/existing', [UnitInventoryController::class, 'storeExisting'])->name('inventory.existing.store');
+    Route::get('/units/{unit}/inventory/{stock}/photo', [UnitInventoryController::class, 'photo'])->name('inventory.photo');
 
     Route::get('/borrowings', [BorrowingController::class, 'index'])->name('borrowings.index');
     Route::get('/borrowings/{borrowing}', [BorrowingController::class, 'show'])->name('borrowings.show');
@@ -50,6 +51,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/incoming', [IncomingGoodsController::class, 'store'])->name('incoming.store');
         Route::get('/incoming/{incoming}', [IncomingGoodsController::class, 'show'])->name('incoming.show');
         Route::get('/incoming/{incoming}/invoice', [IncomingGoodsController::class, 'invoice'])->name('incoming.invoice');
+        Route::get('/incoming/{incoming}/items/{item}/photo', [IncomingGoodsController::class, 'photo'])->name('incoming.photo');
 
         Route::get('/distributions', [DistributionController::class, 'index'])->name('distributions.index');
         Route::get('/distributions/create', [DistributionController::class, 'create'])->name('distributions.create');

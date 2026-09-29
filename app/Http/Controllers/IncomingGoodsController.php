@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\IncomingGood;
+use App\Models\IncomingGoodItem;
 use App\Models\Item;
 use App\Models\Unit;
 use App\Services\IncomingGoodsService;
@@ -107,6 +108,18 @@ class IncomingGoodsController extends Controller
         $incoming->load(['centralUnit', 'items.item']);
 
         return view('incoming.show', compact('incoming'));
+    }
+
+    public function photo(IncomingGood $incoming, IncomingGoodItem $item)
+    {
+        abort_unless($item->incoming_good_id === $incoming->id, 404);
+        abort_unless($item->photo_object_key, 404);
+
+        return Storage::response(
+            $item->photo_object_key,
+            basename($item->photo_object_key),
+            ['Cache-Control' => 'private, no-store, max-age=0'],
+        );
     }
 
     public function invoice(IncomingGood $incoming)

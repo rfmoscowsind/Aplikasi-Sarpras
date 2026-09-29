@@ -10,7 +10,7 @@
                 <tbody>
                 @forelse($stocks as $stock)
                     <tr>
-                        <td><strong>{{ $stock->item->name }}</strong><div class="small muted">{{ $stock->item->specification }}</div><div class="small muted">Input: {{ $stock->creator?->name ?? '-' }}</div></td>
+                        <td><strong>{{ $stock->item->name }}</strong><div class="small muted">{{ $stock->item->specification }}</div><div class="small muted">Input: {{ $stock->creator?->name ?? '-' }}</div>@if($stock->photo_object_key)<div style="margin-top:6px"><a class="btn sm outline" target="_blank" href="{{ route('inventory.photo', [$unit, $stock]) }}">Lihat foto</a></div>@endif</td>
                         <td>{{ $stock->total_qty }}</td><td>{{ $stock->available_qty }}</td><td>{{ $stock->reserved_qty }}</td><td>{{ $stock->borrowed_qty }}</td><td>{{ $stock->damaged_qty }}</td><td>{{ $stock->lost_qty }}</td>
                         <td><span class="badge">{{ $stock->acquisition_source }}</span></td>
                     </tr>

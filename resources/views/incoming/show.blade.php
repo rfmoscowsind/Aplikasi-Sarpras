@@ -13,9 +13,9 @@
 <div class="panel">
     <div class="panel-head"><h2>Barang Diterima</h2></div>
     <div class="table-wrap">
-        <table class="table"><thead><tr><th>Barang</th><th>Spesifikasi</th><th>Jumlah</th></tr></thead><tbody>
+        <table class="table"><thead><tr><th>Barang</th><th>Spesifikasi</th><th>Jumlah</th><th>Foto</th></tr></thead><tbody>
         @foreach($incoming->items as $row)
-            <tr><td><strong>{{ $row->item->name }}</strong></td><td>{{ $row->item->specification ?: '-' }}</td><td>{{ $row->quantity }}</td></tr>
+            <tr><td><strong>{{ $row->item->name }}</strong></td><td>{{ $row->item->specification ?: '-' }}</td><td>{{ $row->quantity }}</td><td>@if($row->photo_object_key)<a class="btn sm outline" target="_blank" href="{{ route('incoming.photo', [$incoming, $row]) }}">Lihat foto</a>@else-@endif</td></tr>
         @endforeach
         </tbody></table>
     </div>
