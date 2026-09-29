@@ -25,11 +25,11 @@ class AppServiceProvider extends ServiceProvider
         });
 
         RateLimiter::for('borrow-submit', function (Request $request) {
-            return Limit::perMinutes(10, 5)->by($request->ip().'|'.$request->route('token'));
+            return Limit::perMinute(5)->by($request->ip().'|'.$request->route('token'));
         });
 
         RateLimiter::for('return-submit', function (Request $request) {
-            return Limit::perMinutes(10, 8)->by($request->ip().'|'.$request->route('token'));
+            return Limit::perMinute(8)->by($request->ip().'|'.$request->route('token'));
         });
     }
 }

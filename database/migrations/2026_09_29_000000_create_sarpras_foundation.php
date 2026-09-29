@@ -39,7 +39,7 @@ return new class extends Migration
             $table->boolean('can_manage_inventory')->default(false);
             $table->boolean('can_manage_borrowing')->default(false);
             $table->timestamps();
-            $table->unique(['unit_id', 'user_id', 'role']);
+            $table->unique(['unit_id', 'user_id']);
         });
 
         Schema::create('items', function (Blueprint $table) {

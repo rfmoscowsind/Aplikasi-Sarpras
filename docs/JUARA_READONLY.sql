@@ -13,7 +13,6 @@ INNER JOIN classes AS c
     ON c.id = u.class_id
 INNER JOIN model_has_roles AS mhr
     ON mhr.model_id = u.id
-   AND mhr.model_type = 'App\\Models\\User'
 INNER JOIN roles AS r
     ON r.id = mhr.role_id
    AND r.name = 'siswa'
