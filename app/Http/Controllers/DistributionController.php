@@ -55,6 +55,7 @@ class DistributionController extends Controller
         ]);
 
         $source = Unit::query()->where('type', 'central')->findOrFail($data['source_unit_id']);
+        Unit::query()->where('type', '!=', 'central')->findOrFail($data['target_unit_id']);
 
         $distribution = DB::transaction(function () use ($data, $source, $request) {
             $distribution = Distribution::create([

@@ -47,4 +47,23 @@ class AuthTest extends TestCase
         $response->assertSessionHasErrors('email');
         $this->assertGuest();
     }
+    public function test_deactivated_existing_session_is_revoked(): void
+    {
+        $user = User::create([
+            'name' => 'Active Then Disabled',
+            'email' => 'revoke@example.test',
+            'password' => 'password-testing',
+            'system_role' => 'unit',
+            'is_active' => true,
+        ]);
+
+        $this->actingAs($user);
+
+        $user->update(['is_active' => false]);
+
+        $response = $this->get(route('dashboard'));
+
+        $response->assertForbidden();
+        $this->assertGuest();
+    }
 }
