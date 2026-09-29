@@ -19,6 +19,10 @@ class Unit extends Model
         'borrowing_enabled',
     ];
 
+    protected $hidden = [
+        'borrow_pin_hash',
+    ];
+
     protected function casts(): array
     {
         return [
@@ -29,5 +33,15 @@ class Unit extends Model
     public function stocks()
     {
         return $this->hasMany(UnitStock::class);
+    }
+
+    public function memberships()
+    {
+        return $this->hasMany(UnitMembership::class);
+    }
+
+    public function borrowings()
+    {
+        return $this->hasMany(Borrowing::class);
     }
 }

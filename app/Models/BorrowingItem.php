@@ -26,4 +26,9 @@ class BorrowingItem extends Model
     {
         return $this->belongsTo(Item::class);
     }
+
+    public function outstandingQty(): int
+    {
+        return max(0, (int) $this->handed_over_qty - (int) $this->returned_qty);
+    }
 }

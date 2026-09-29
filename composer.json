@@ -5,7 +5,8 @@
   "description": "Aplikasi pengelolaan sarana-prasarana sekolah.",
   "license": "proprietary",
   "require": {
-    "php": "^8.3",
+    "php": "^8.4",
+    "endroid/qr-code": "^6.1",
     "laravel/framework": "^13.17",
     "laravel/tinker": "^3.0"
   },
