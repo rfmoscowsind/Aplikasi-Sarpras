@@ -109,6 +109,89 @@ class StockService
         $this->movement($unitId, $itemId, $bucket, $quantity, $reason, $referenceType, $referenceId, $actorId);
     }
 
+
+    public function transferReserved(
+        int $sourceUnitId,
+        int $targetUnitId,
+        int $itemId,
+        int $quantity,
+        string $reason = 'distribution_completed',
+        ?string $referenceType = null,
+        ?int $referenceId = null,
+        ?int $actorId = null,
+    ): void {
+        if ($quantity < 1 || $sourceUnitId === $targetUnitId) {
+            throw ValidationException::withMessages(['quantity' => 'Mutasi stok tidak valid.']);
+        }
+
+        UnitStock::query()->insertOrIgnore([
+            'unit_id' => $targetUnitId,
+            'item_id' => $itemId,
+            'total_qty' => 0,
+            'available_qty' => 0,
+            'reserved_qty' => 0,
+            'borrowed_qty' => 0,
+            'damaged_qty' => 0,
+            'lost_qty' => 0,
+            'acquisition_source' => 'central_distribution',
+            'created_by' => $actorId,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $unitIds = [$sourceUnitId, $targetUnitId];
+        sort($unitIds);
+
+        $stocks = UnitStock::query()
+            ->where('item_id', $itemId)
+            ->whereIn('unit_id', $unitIds)
+            ->orderBy('unit_id')
+            ->lockForUpdate()
+            ->get()
+            ->keyBy('unit_id');
+
+        $source = $stocks->get($sourceUnitId);
+        $target = $stocks->get($targetUnitId);
+
+        if (!$source || !$target || $source->reserved_qty < $quantity) {
+            throw ValidationException::withMessages([
+                'quantity' => 'Stok yang dialokasikan tidak mencukupi.',
+            ]);
+        }
+
+        $source->decrement('reserved_qty', $quantity);
+        $source->decrement('total_qty', $quantity);
+        $target->increment('available_qty', $quantity);
+        $target->increment('total_qty', $quantity);
+
+        if (!$target->photo_object_key && $source->photo_object_key) {
+            $target->update(['photo_object_key' => $source->photo_object_key]);
+        }
+
+        $this->movement(
+            $sourceUnitId,
+            $itemId,
+            'reserved',
+            -$quantity,
+            $reason,
+            $referenceType,
+            $referenceId,
+            $actorId,
+            ['target_unit_id' => $targetUnitId],
+        );
+        $this->movement(
+            $targetUnitId,
+            $itemId,
+            'available',
+            $quantity,
+            $reason,
+            $referenceType,
+            $referenceId,
+            $actorId,
+            ['source_unit_id' => $sourceUnitId],
+        );
+    }
+
     public function transferAvailable(
         int $sourceUnitId,
         int $targetUnitId,

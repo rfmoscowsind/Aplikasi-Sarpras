@@ -58,6 +58,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/distributions/{distribution}/letter', [DistributionController::class, 'letter'])->name('distributions.letter');
         Route::post('/distributions/{distribution}/signed-document', [DistributionController::class, 'uploadSigned'])->name('distributions.signed.upload');
         Route::post('/distributions/{distribution}/complete', [DistributionController::class, 'complete'])->name('distributions.complete');
+        Route::post('/distributions/{distribution}/cancel', [DistributionController::class, 'cancel'])->name('distributions.cancel');
         Route::get('/distributions/{distribution}/signed-document', [DistributionController::class, 'signedDocument'])->name('distributions.signed.download');
 
         Route::get('/stock-ledger', [StockMovementController::class, 'index'])->name('stock-movements.index');

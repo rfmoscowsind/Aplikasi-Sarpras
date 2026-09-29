@@ -38,10 +38,14 @@
     <div class="panel">
         <div class="panel-head"><h2>2. Konfirmasi Perpindahan Stok</h2></div>
         <div class="panel-body">
-            <p class="muted">Stok baru berpindah setelah langkah ini. Sistem mengecek ulang stok dengan row lock di dalam transaction.</p>
+            <p class="muted">Saat distribusi dibuat, stok sudah dialokasikan ke bucket reserved sehingga tidak bisa dipakai transaksi lain. Setelah surat TTD di-upload, langkah ini memindahkan alokasi tersebut ke unit tujuan secara atomik.</p>
             <form method="post" action="{{ route('distributions.complete', $distribution) }}" onsubmit="return confirm('Pastikan surat sudah lengkap ditandatangani. Pindahkan stok sekarang?')">
                 @csrf
                 <button class="btn primary" type="submit" {{ $distribution->signed_document_object_key ? '' : 'disabled' }}>Konfirmasi Serah Terima</button>
+            </form>
+            <form method="post" action="{{ route('distributions.cancel', $distribution) }}" style="margin-top:10px" onsubmit="return confirm('Batalkan distribusi dan kembalikan alokasi stok?')">
+                @csrf
+                <button class="btn danger" type="submit">Batalkan Distribusi</button>
             </form>
         </div>
     </div>

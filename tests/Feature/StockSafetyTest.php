@@ -58,6 +58,50 @@ class StockSafetyTest extends TestCase
         $this->assertStock($target->id, $item->id, total: 3, available: 3);
     }
 
+
+    public function test_distribution_allocation_uses_reserved_bucket_until_completion(): void
+    {
+        [$actor, $source, $target, $item] = $this->fixture();
+        $service = app(StockService::class);
+
+        DB::transaction(fn () => $service->addAvailable(
+            $source->id,
+            $item->id,
+            6,
+            'test_seed',
+            actorId: $actor->id,
+        ));
+
+        DB::transaction(fn () => $service->reserve(
+            $source->id,
+            $item->id,
+            4,
+            'distribution_allocated',
+            actorId: $actor->id,
+        ));
+
+        $sourceStock = UnitStock::query()
+            ->where('unit_id', $source->id)
+            ->where('item_id', $item->id)
+            ->firstOrFail();
+
+        $this->assertSame(6, $sourceStock->total_qty);
+        $this->assertSame(2, $sourceStock->available_qty);
+        $this->assertSame(4, $sourceStock->reserved_qty);
+        $this->assertTrue($sourceStock->quantityInvariantIsValid());
+
+        DB::transaction(fn () => $service->transferReserved(
+            $source->id,
+            $target->id,
+            $item->id,
+            4,
+            actorId: $actor->id,
+        ));
+
+        $this->assertStock($source->id, $item->id, total: 2, available: 2);
+        $this->assertStock($target->id, $item->id, total: 4, available: 4);
+    }
+
     public function test_borrowing_buckets_keep_quantity_invariant(): void
     {
         [$actor, $unit, , $item] = $this->fixture();

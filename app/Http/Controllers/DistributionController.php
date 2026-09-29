@@ -7,16 +7,17 @@ use App\Models\Item;
 use App\Models\Unit;
 use App\Services\AuditService;
 use App\Services\DistributionService;
+use App\Services\StockService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use Illuminate\Validation\ValidationException;
 
 class DistributionController extends Controller
 {
     public function __construct(
         private readonly DistributionService $service,
+        private readonly StockService $stock,
         private readonly AuditService $audit,
     ) {
     }
@@ -75,20 +76,20 @@ class DistributionController extends Controller
             $distribution->save();
 
             foreach ($data['items'] as $row) {
-                $available = $source->stocks()
-                    ->where('item_id', $row['item_id'])
-                    ->value('available_qty');
-
-                if ((int) $available < (int) $row['quantity']) {
-                    throw ValidationException::withMessages([
-                        'items' => 'Ada jumlah distribusi yang melebihi stok tersedia.',
-                    ]);
-                }
-
                 $distribution->items()->create([
                     'item_id' => $row['item_id'],
                     'quantity' => $row['quantity'],
                 ]);
+
+                $this->stock->reserve(
+                    $source->id,
+                    (int) $row['item_id'],
+                    (int) $row['quantity'],
+                    'distribution_allocated',
+                    Distribution::class,
+                    $distribution->id,
+                    $request->user()->id,
+                );
             }
 
             $this->audit->log($request->user(), 'distribution.created', $distribution, null, [
@@ -118,7 +119,7 @@ class DistributionController extends Controller
 
     public function uploadSigned(Request $request, Distribution $distribution)
     {
-        abort_if($distribution->status === 'completed', 422, 'Distribusi sudah selesai.');
+        abort_if(in_array($distribution->status, ['completed', 'cancelled'], true), 422, 'Distribusi sudah final.');
 
         $request->validate([
             'signed_document' => ['required', 'file', 'mimes:pdf,jpg,jpeg,png,webp', 'max:15360'],
@@ -146,6 +147,13 @@ class DistributionController extends Controller
         $this->service->complete($distribution, $request->user());
 
         return back()->with('success', 'Distribusi selesai dan stok sudah dipindahkan.');
+    }
+
+    public function cancel(Request $request, Distribution $distribution)
+    {
+        $this->service->cancel($distribution, $request->user());
+
+        return back()->with('success', 'Distribusi dibatalkan dan alokasi stok dikembalikan.');
     }
 
     public function signedDocument(Distribution $distribution)
