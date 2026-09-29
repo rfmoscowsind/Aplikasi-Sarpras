@@ -15,6 +15,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'system_role',
         'is_active',
     ];
 
@@ -34,5 +35,15 @@ class User extends Authenticatable
     public function unitMemberships()
     {
         return $this->hasMany(UnitMembership::class);
+    }
+
+    public function isSystemAdmin(): bool
+    {
+        return $this->system_role === 'admin';
+    }
+
+    public function isSarpras(): bool
+    {
+        return in_array($this->system_role, ['admin', 'sarpras'], true);
     }
 }

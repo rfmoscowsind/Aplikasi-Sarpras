@@ -9,12 +9,16 @@ class UnitStock extends Model
     protected $fillable = [
         'unit_id',
         'item_id',
+        'acquisition_source',
         'total_qty',
         'available_qty',
         'reserved_qty',
         'borrowed_qty',
         'damaged_qty',
         'lost_qty',
+        'photo_object_key',
+        'notes',
+        'created_by',
     ];
 
     public function unit()
@@ -25,6 +29,11 @@ class UnitStock extends Model
     public function item()
     {
         return $this->belongsTo(Item::class);
+    }
+
+    public function creator()
+    {
+        return $this->belongsTo(User::class, 'created_by');
     }
 
     public function quantityInvariantIsValid(): bool
