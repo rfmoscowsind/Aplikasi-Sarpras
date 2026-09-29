@@ -1,8 +1,8 @@
 # LXC Requirements — Aplikasi Sarpras
 
-Target awal: satu LXC aplikasi untuk Laravel. Database, Redis, dan S3-compatible storage boleh berada di host/service terpisah.
+Target awal: satu LXC aplikasi Laravel. Database, Redis, JUARA, dan S3-compatible storage boleh berada di host/service terpisah.
 
-## Minimum development
+## LXC
 
 - OS: Debian 13 atau Ubuntu 24.04 LTS
 - LXC: unprivileged
@@ -14,7 +14,7 @@ Target awal: satu LXC aplikasi untuk Laravel. Database, Redis, dan S3-compatible
 
 ## Runtime
 
-- PHP 8.4 recommended (Laravel 13 membutuhkan PHP >= 8.3)
+- PHP **8.4** (required by the QR library used by this project)
 - Extensions:
   - bcmath
   - ctype
@@ -30,48 +30,42 @@ Target awal: satu LXC aplikasi untuk Laravel. Database, Redis, dan S3-compatible
   - xml
   - zip
 - Composer 2.x
-- Node.js LTS + npm
 - Nginx
 - Git
+- Node.js is not required for the current server-rendered MVP.
 
-## Services
+QR is generated locally as SVG by `endroid/qr-code`; the public unit token is never sent to a third-party QR service.
 
-### Main database
+## Main database
 
-MySQL 8 / MariaDB yang kompatibel.
+MySQL 8 or compatible MariaDB.
 
-Database user aplikasi **jangan root**. Beri hak hanya pada database Sarpras.
+Create a dedicated Sarpras user. Do not run the application with root database credentials.
 
-### Redis
+## Redis
 
-Dipakai untuk:
+Used for cache, session, queue, rate limiting and temporary public-form state.
 
-- cache;
-- session;
-- queue;
-- rate limiting / temporary public-form state.
+## S3-compatible storage
 
-### S3-compatible storage
+Production should use a private MinIO/S3-compatible bucket.
 
-Production disarankan memakai MinIO / S3-compatible storage.
+Stored objects include:
 
-Bucket Sarpras bersifat private. Foto barang, invoice, surat serah-terima bertanda tangan, dan bukti pengembalian tidak boleh diekspos sebagai public object.
+- item photos;
+- invoices;
+- signed distribution handover documents;
+- borrower return evidence photos.
 
-### JUARA database
+Do not make the bucket public.
 
-Sarpras memakai koneksi kedua bernama `juara`.
+## JUARA read-only
 
-Buat credential terpisah seperti `sarpras_reader` yang hanya diberi hak SELECT pada view/dataset siswa yang diperlukan. Jangan beri write permission ke database JUARA.
+Run `docs/JUARA_READONLY.sql` on the JUARA database.
 
-Data minimum yang dibutuhkan:
+Create a dedicated `sarpras_reader` credential that receives SELECT only on `sarpras_student_directory`.
 
-- student_id;
-- name;
-- nis;
-- class_name;
-- class_code.
-
-Rekomendasi: expose view khusus, misalnya `sarpras_student_directory`, bukan akses bebas ke seluruh tabel `users`.
+Do not grant INSERT, UPDATE, DELETE or broad `SELECT ON juara.*`.
 
 ## First boot
 
@@ -79,32 +73,45 @@ Rekomendasi: expose view khusus, misalnya `sarpras_student_directory`, bukan aks
 git clone https://github.com/rfmoscowsind/Aplikasi-Sarpras.git
 cd Aplikasi-Sarpras
 cp .env.example .env
+nano .env
 composer install
 php artisan key:generate
-php artisan migrate
+php artisan migrate --seed
+php artisan optimize:clear
 ```
 
-Setelah frontend ditambahkan:
+Before seeding, fill:
+
+- `SARPRAS_ADMIN_EMAIL`
+- `SARPRAS_ADMIN_PASSWORD`
+
+Also configure DB, JUARA, Redis and S3 values.
+
+## Nginx
+
+Document root must point to:
+
+```text
+/path/to/Aplikasi-Sarpras/public
+```
+
+Do not expose the project root.
+
+## Workers
+
+For production run at least:
 
 ```bash
-npm install
-npm run build
+php artisan queue:work --sleep=1 --tries=3
+php artisan schedule:work
 ```
 
-## Environment values to prepare
+Use systemd or another service supervisor.
 
-Isi minimal:
+## Health check
 
-- `APP_URL`
-- `DB_HOST`
-- `DB_DATABASE`
-- `DB_USERNAME`
-- `DB_PASSWORD`
-- `JUARA_DB_*`
-- `REDIS_HOST`
-- `AWS_ACCESS_KEY_ID`
-- `AWS_SECRET_ACCESS_KEY`
-- `AWS_BUCKET`
-- `AWS_ENDPOINT`
+Laravel health endpoint:
 
-Jangan commit file `.env`.
+```text
+GET /up
+```
