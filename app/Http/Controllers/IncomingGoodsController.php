@@ -50,7 +50,7 @@ class IncomingGoodsController extends Controller
             'items.*.quantity' => ['required', 'integer', 'min:1', 'max:100000'],
             'items.*.borrowable' => ['nullable', 'boolean'],
             'items.*.require_return_photo' => ['nullable', 'boolean'],
-            'items.*.photo' => ['nullable', 'image', 'max:8192'],
+            'items.*.photo' => ['required', 'image', 'max:8192'],
         ]);
 
         $centralUnit = Unit::query()->where('type', 'central')->findOrFail($data['central_unit_id']);

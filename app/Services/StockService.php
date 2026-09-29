@@ -161,6 +161,10 @@ class StockService
         $target->increment('available_qty', $quantity);
         $target->increment('total_qty', $quantity);
 
+        if (!$target->photo_object_key && $source->photo_object_key) {
+            $target->update(['photo_object_key' => $source->photo_object_key]);
+        }
+
         $this->movement($sourceUnitId, $itemId, 'available', -$quantity, $reason, $referenceType, $referenceId, $actorId, ['target_unit_id' => $targetUnitId]);
         $this->movement($targetUnitId, $itemId, 'available', $quantity, $reason, $referenceType, $referenceId, $actorId, ['source_unit_id' => $sourceUnitId]);
     }

@@ -199,7 +199,6 @@ class PublicBorrowController extends Controller
                     ->where('unit_id', $unit->id)
                     ->where('item_id', $row['item_id'])
                     ->whereHas('item', fn ($query) => $query->where('borrowable', true))
-                    ->lockForUpdate()
                     ->first();
 
                 if (!$stock || $stock->available_qty < (int) $row['quantity']) {

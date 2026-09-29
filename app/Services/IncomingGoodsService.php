@@ -54,8 +54,14 @@ class IncomingGoodsService
                     IncomingGood::class,
                     $incoming->id,
                     $actor->id,
-                    ['acquisition_source' => 'other', 'incoming_good_item_id' => $detail->id],
+                    ['acquisition_source' => 'unit_purchase', 'incoming_good_item_id' => $detail->id],
                 );
+                if (!empty($row['photo_object_key'])) {
+                    \App\Models\UnitStock::query()
+                        ->where('unit_id', $centralUnit->id)
+                        ->where('item_id', $item->id)
+                        ->update(['photo_object_key' => $row['photo_object_key']]);
+                }
             }
 
             $this->audit->log($actor, 'incoming_goods.created', $incoming, null, [
